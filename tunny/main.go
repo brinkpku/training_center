@@ -1,9 +1,11 @@
-package tunny
+package main
 
 import (
 	"context"
 	"sync"
 	"time"
+
+	"github.com/Jeffail/tunny"
 )
 
 type params struct {
@@ -16,14 +18,23 @@ func main() {
 	wg := sync.WaitGroup{}
 	wg.Add(3)
 
-	pool := NewFunc(numCPUs, func(payload interface{}) interface{} {
+	pool := tunny.NewFunc(numCPUs, func(payload interface{}) interface{} {
 		param := payload.(*params)
 		println(param.name, "start")
-		// TODO: Something CPU heavy with payload
-		time.Sleep(time.Second * time.Duration(param.wait))
-		println(param.name, "finished")
-		wg.Done()
-		return nil
+		timer := time.NewTimer(time.Second * time.Duration(param.wait))
+		ticker := time.NewTicker(time.Second)
+		runned := 0
+		for {
+			select {
+			case <-timer.C:
+				println(param.name, "finished")
+				wg.Done()
+				return nil
+			case <-ticker.C:
+				runned++
+				println(param.name, "is running", runned)
+			}
+		}
 	})
 	defer pool.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
@@ -41,8 +52,8 @@ func main() {
 	}
 	go pool.ProcessCtx(ctx, param1)
 	go pool.ProcessCtx(ctx, param2)
-	cancel()
-	time.Sleep(time.Second * 2)
+	time.Sleep(time.Second * 3)
+	cancel() // can't cancel, because it has run
 	go pool.Process(param3)
 	wg.Wait()
 }
