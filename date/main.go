@@ -6,8 +6,7 @@ import (
 )
 
 func main() {
-	start := time.Unix(1625766611, 0)
-	time.Sleep(time.Second)
+	start := time.Unix(1613356602, 0)
 	for ; start.Before(time.Now()); start = start.Add(time.Hour * 24) {
 		fmt.Println(start.Format("sensego/plate/2006/01/02"))
 	}
