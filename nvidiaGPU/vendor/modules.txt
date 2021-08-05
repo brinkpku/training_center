@@ -1,0 +1,2 @@
+# github.com/NVIDIA/gpu-monitoring-tools v0.0.0-20210803220325-7c362b2f4913
+github.com/NVIDIA/gpu-monitoring-tools/bindings/go/nvml
