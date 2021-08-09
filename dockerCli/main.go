@@ -64,6 +64,12 @@ func main() {
 	} else {
 		fmt.Println("running status:", running)
 	}
+	var timeout = new(time.Duration)
+	*timeout = time.Second * 10
+	if err := dockerCli.Client().ContainerStop(context.Background(), "atm-test.v1", timeout); err != nil {
+		fmt.Println("stop error:", err)
+	}
+	dockerCli.Client().ContainerRemove(context.Background(), "atm-test.v1", types.ContainerRemoveOptions{})
 }
 
 // WorkerManager vps worker manager
