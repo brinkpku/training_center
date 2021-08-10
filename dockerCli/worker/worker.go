@@ -17,6 +17,7 @@ type VPSWorker struct {
 	Image   string
 	Command string
 	Restart bool
+	Env     []string
 }
 
 // StringSlice ...
@@ -43,6 +44,11 @@ func (v VPSWorker) StringSlice() []string {
 	if len(v.Volume) != 0 {
 		for src, dst := range v.Volume {
 			ret = append(ret, []string{"--volume", fmt.Sprintf("%s:%s", src, dst)}...)
+		}
+	}
+	if len(v.Env) != 0 {
+		for _, e := range v.Env {
+			ret = append(ret, "-e", e)
 		}
 	}
 	if len(v.Image) != 0 {

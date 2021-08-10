@@ -1,0 +1,7 @@
+github.com/Masterminds/semver v1.5.0/go.mod h1:MB6lktGJrhw8PrUyiEoblNEGEQ+RzHPF078ddwwvV3Y=
+github.com/NVIDIA/gpu-monitoring-tools v0.0.0-20210727201008-d28b00049ff3 h1:f8Faf437LKhRtOoSvlqx7GnjTIf3wfK6H3T/o3WkQFE=
+github.com/NVIDIA/gpu-monitoring-tools v0.0.0-20210727201008-d28b00049ff3/go.mod h1:oKPJa5eOTkWvlT4/Y4D8Nds44Fzmww5HUK+xwO+DwTA=
+github.com/NVIDIA/gpu-monitoring-tools v0.0.0-20210803220325-7c362b2f4913 h1:Ut0vvYLlkm0JtmKHkWht9fPWkt/Qk+1uH8Q2iNReK9M=
+github.com/NVIDIA/gpu-monitoring-tools v0.0.0-20210803220325-7c362b2f4913/go.mod h1:oKPJa5eOTkWvlT4/Y4D8Nds44Fzmww5HUK+xwO+DwTA=
+github.com/NVIDIA/gpu-monitoring-tools/bindings/go/dcgm v0.0.0-20210325210537-29b4f1784f18/go.mod h1:8qXwltEzU3idjUcVpMOv3FNgxxbDeXZPGMLyc/khWiY=
+github.com/gorilla/mux v1.7.4/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
