@@ -1,4 +1,4 @@
-module github.com/brinkpku/training_center/nvidaGPU
+module github.com/brinkpku/training_center/nvidiaGPU
 
 go 1.15
 

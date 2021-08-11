@@ -15,6 +15,8 @@ func init() {
 }
 
 func main() {
+	nvml.Init()
+	defer nvml.Shutdown()
 	device, err := nvml.NewDevice(deviceID)
 	if err != nil {
 		fmt.Println("nvml new device error:", err)
@@ -23,7 +25,6 @@ func main() {
 	attr, err := device.GetAttributes()
 	if err != nil {
 		fmt.Println("get attr error:", err)
-		return
 	}
 	fmt.Printf("device %v attr: %v\n", deviceID, attr)
 	status, err := device.Status()
@@ -32,4 +33,6 @@ func main() {
 		return
 	}
 	fmt.Printf("device %v status: %v\n", deviceID, status)
+	fmt.Println("memory free", *status.Memory.Global.Free, "used", *status.Memory.Global.Used)
+	fmt.Println("utilization", *status.Utilization.Memory)
 }
