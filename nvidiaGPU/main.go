@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"time"
 
 	"github.com/NVIDIA/gpu-monitoring-tools/bindings/go/nvml"
 )
@@ -27,12 +28,17 @@ func main() {
 		fmt.Println("get attr error:", err)
 	}
 	fmt.Printf("device %v attr: %v\n", deviceID, attr)
-	status, err := device.Status()
-	if err != nil {
-		fmt.Println("get status error:", err)
-		return
+	for i := 0; i < 2; i++ {
+		status, err := device.Status()
+		if err != nil {
+			fmt.Println("get status error:", err)
+			return
+		}
+		// fmt.Printf("device %v status: %v\n", deviceID, status)
+		fmt.Println("memory free", *status.Memory.Global.Free, "used", *status.Memory.Global.Used)
+		fmt.Println("utilization", *status.Utilization.Memory)
+		fmt.Println("temperature", *status.Temperature)
+		fmt.Println("power", *status.Power)
+		time.Sleep(time.Second * 5)
 	}
-	fmt.Printf("device %v status: %v\n", deviceID, status)
-	fmt.Println("memory free", *status.Memory.Global.Free, "used", *status.Memory.Global.Used)
-	fmt.Println("utilization", *status.Utilization.Memory)
 }
