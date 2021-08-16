@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os/exec"
 	"time"
 
 	"github.com/brinkpku/training_center/dockerCli/worker"
@@ -12,6 +13,10 @@ import (
 	"github.com/docker/cli/cli/command/container"
 	"github.com/docker/cli/cli/flags"
 	"github.com/docker/docker/api/types"
+	containertypes "github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
+	networktypes "github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 )
@@ -24,7 +29,7 @@ func init() {
 	flag.StringVar(&wName, "wname", "tms", "")
 	flag.Parse()
 	var err error
-	dockerCli, err = command.NewDockerCli()
+	dockerCli, err = command.NewDockerCli() // different with official api init method
 	if err != nil {
 		panic(err)
 	}
@@ -34,42 +39,66 @@ func init() {
 		panic(err)
 	}
 }
+
 func main() {
 	c := Config{Image: "golang:1.13.14", Command: "bash"}
 	InitManager(c)
 	app := &Applet{
-		Name:         "test",
-		Version:      1,
-		Path:         "pathxxx",
-		ZKConfig:     "zkxxx",
-		AlgoConfig:   "algo.xxx",
-		RenderConfig: "renderxxx",
+		Name:       "test",
+		Version:    1,
+		Path:       "/Users/youmengyuan",
+		AlgoConfig: "/Users/yumengyuan",
 	}
+
+	// list and stop remove
 	if containers, err := ListAll(); err != nil {
 		fmt.Println("list error", err)
 	} else {
 		for _, c := range containers {
 			fmt.Println(c.Names, c.State, c.Command)
+			if c.Names[0] == "/atm-test.v1" {
+				var timeout = new(time.Duration)
+				*timeout = time.Second * 10
+				if err := dockerCli.Client().ContainerStop(context.Background(), "atm-test.v1", timeout); err != nil {
+					fmt.Println("stop error:", err)
+				}
+				dockerCli.Client().ContainerRemove(context.Background(), "atm-test.v1", types.ContainerRemoveOptions{})
+			}
 		}
 	}
-	if err := WorkerManager.Remove(app); err != nil {
-		fmt.Println("remove container error", err)
-	} else {
-		fmt.Println("container removed")
+	// two methods of running a container
+	// WorkerManager.Start(app, 1)
+	_, err := dockerCli.Client().ContainerCreate(context.Background(),
+		&containertypes.Config{Image: c.Image, Cmd: strslice.StrSlice{c.Command}, Tty: true},
+		// nil, nil,
+		&containertypes.HostConfig{
+			// NetworkMode: containertypes.NetworkMode("viper-lite"),
+			Mounts: []mount.Mount{{Type: mount.TypeBind, Source: "/Users/youmengyuan", Target: "/viper-lite/test"}},
+			// Resources: containertypes.Resources{DeviceRequests: []containertypes.DeviceRequest{{
+			// 	Driver:    "nivida",
+			// 	Count:     1,
+			// 	DeviceIDs: []string{"0"},
+			// }}},
+		},
+		&networktypes.NetworkingConfig{},
+		nil, "atm-test.v1")
+	if err != nil {
+		fmt.Println("create error:", err)
+		return
 	}
-	WorkerManager.Start(app, 1)
-	fmt.Println(wName)
+	err = dockerCli.Client().ContainerStart(context.Background(), "atm-test.v1", types.ContainerStartOptions{})
+	if err != nil {
+		fmt.Println("start error:", err)
+		return
+	}
+	// inspect is running
 	if running, err := WorkerManager.IsRunning("atm-test.v1"); err != nil {
 		fmt.Println("inspect error:", err)
 	} else {
 		fmt.Println("running status:", running)
 	}
-	var timeout = new(time.Duration)
-	*timeout = time.Second * 10
-	if err := dockerCli.Client().ContainerStop(context.Background(), "atm-test.v1", timeout); err != nil {
-		fmt.Println("stop error:", err)
-	}
-	dockerCli.Client().ContainerRemove(context.Background(), "atm-test.v1", types.ContainerRemoveOptions{})
+	WorkerManager.Stop(app)
+	WorkerManager.Start(app, 1)
 }
 
 // WorkerManager vps worker manager
@@ -92,13 +121,6 @@ type Manager struct {
 // InitManager ...
 func InitManager(config Config) {
 	WorkerManager = &Manager{config: config}
-}
-
-const dockerName = "docker"
-
-// Name ...
-func (m *Manager) Name() string {
-	return dockerName
 }
 
 // Applet ...
@@ -134,8 +156,9 @@ func (m *Manager) Start(app *Applet, gpuID int) error {
 
 	log.Println(tmpl.StringSlice())
 	var err error
-	for retry := 0; retry < 3; retry++ {
-		err = Execute(container.NewRunCommand, tmpl.StringSlice())
+	for retry := 0; retry < 1; retry++ {
+		// err = Execute(container.NewRunCommand, tmpl.StringSlice())
+		err = runContainerByCmd(tmpl.StringSlice())
 		if err != nil {
 			fmt.Println("run docker error", err)
 			time.Sleep(time.Duration(backOff) * time.Second)
@@ -168,6 +191,17 @@ func (m *Manager) IsRunning(cname string) (bool, error) {
 		return false, err
 	}
 	return c.State.Running, nil
+}
+
+func runContainerByCmd(args []string) (err error) {
+	cmd := exec.Command("docker", args...)
+	data, err := cmd.Output()
+	if err != nil {
+		err = fmt.Errorf("failed to call Output(): %v", err)
+		return
+	}
+	fmt.Println("hhhh", string(data))
+	return
 }
 
 // Execute ...

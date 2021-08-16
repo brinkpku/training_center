@@ -22,7 +22,7 @@ type VPSWorker struct {
 
 // StringSlice ...
 func (v VPSWorker) StringSlice() []string {
-	ret := []string{"-dit"}
+	ret := []string{"run", "-dit"}
 	if v.Name != "" {
 		ret = append(ret, []string{"--name", v.Name}...)
 	}
