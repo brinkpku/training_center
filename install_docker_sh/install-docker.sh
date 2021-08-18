@@ -3,6 +3,7 @@
 set -e
 
 remove_docker(){
+    set +e
     echo "remove docker..."
     sudo yum remove docker \
         docker-client \
@@ -16,6 +17,7 @@ remove_docker(){
     sudo yum remove docker-ce docker-ce-cli containerd.io
     sudo rm -rf /var/lib/docker
     sudo rm -rf /var/lib/containerd
+    return 0
 }
 
 # yum list docker-ce --showduplicates | sort -r
@@ -29,31 +31,40 @@ install_docker(){
     sudo yum install docker-ce-19.03.13 docker-ce-cli-19.03.13 containerd.io
 }
 
+install_nvidia_docker(){
+    echo "install nvidia docker..."
+    distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
+    && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.repo | sudo tee /etc/yum.repos.d/nvidia-docker.repo
+    sudo yum install -y nvidia-docker2
+}
+
 start_docker(){
-    echo "start docker"
+    echo "start docker..."
     sudo systemctl start docker
 }
 
 set_auto_start_docker(){
-    echo "set auto start docker"
+    echo "set auto start docker..."
     sudo systemctl enable docker.service
     sudo systemctl enable containerd.service
 }
 
 # install docker-compose
 install_docker_compose(){
-    echo "install docker-compose"
+    echo "install docker-compose..."
     wget https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
     sudo chmod 770 docker-compose-Linux-x86_64
     cp docker-compose-Linux-x86_64 /usr/local/bin/docker-compose
 }
 
 main(){
-    remove_docker
+    # remove_docker
     install_docker
+    install_nvidia_docker
     start_docker
     set_auto_start_docker
     install_docker_compose
+    echo "all succeed."
     return 0
 }
 
@@ -66,6 +77,9 @@ remove_docker)
     ;;
 install_docker)
     install_docker
+    ;;
+install_nvidia_docker)
+    install_nvidia_docker
     ;;
 start_docker)
     start_docker
