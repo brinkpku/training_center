@@ -30,13 +30,11 @@ remove_docker(){
 # containerd.io 
 # curl --connect-timeout 5 -O -L https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.3.7-3.1.el7.x86_64.rpm
 
+# sudo yum install --downloadonly -y docker-ce-19.03.13 docker-ce-cli-19.03.13 containerd.io-1.3.7 --downloaddir=dockerrpm
+# repotrack  docker-ce-19.03.13 docker-ce-cli-19.03.13 containerd.io-1.3.7
 install_docker(){
-    echo "docker ce..."
-    sudo yum install docker-ce-19.03.13-3.el7.x86_64.rpm
-    echo "docker ce cli..."
-    sudo yum install docker-ce-cli-19.03.13-3.el7.x86_64.rpm
-    echo "install containerd.io..."
-    sudo yum install containerd.io-1.3.7-3.1.el7.x86_64.rpm
+    echo "install docker ce cli containerd.io..."
+    sudo yum install repotrack_docker/*.rpm
 }
 
 # nvidia-docker need add repo
@@ -45,11 +43,7 @@ install_docker(){
 install_nvidia_docker(){
     echo "install nvidia docker..."
     nvidia_path="nvidia-docker2-2.6.0"
-    for file in $(ls $nvidia_path)
-    do  
-    echo "install" $nvidia_path/$file;
-    sudo yum install $nvidia_path/$file
-    done  
+    sudo yum install $(ls $nvidia_path)
 }
 start_docker(){
     echo "start docker..."
