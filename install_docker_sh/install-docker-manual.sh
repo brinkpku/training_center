@@ -41,9 +41,16 @@ install_docker(){
 # sudo yum install --downloadonly -y nvidia-docker2-2.6.0 --downloaddir=nvidia-docker2
 
 install_nvidia_docker(){
+    set +e
     echo "install nvidia docker..."
     nvidia_path="nvidia-docker2-2.6.0"
     sudo yum install $(ls $nvidia_path)
+    if [ $? -eq 0 -o $? -eq 1 ]; then
+        set -e
+	    return 0
+    else
+        exit $?
+    fi
 }
 start_docker(){
     echo "start docker..."

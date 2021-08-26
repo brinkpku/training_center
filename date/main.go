@@ -11,7 +11,7 @@ func main() {
 		fmt.Println(start.Format("sensego/plate/2006/01/02"))
 	}
 	today := getTodayZero()
-	fmt.Println(today.Add(-time.Hour * 24 * 90).Format("2006/01/02"))
+	fmt.Println(today.Add(-time.Hour * 24 * 90).Format("2006/1/2"))
 }
 
 func getTodayZero() time.Time {
