@@ -37,6 +37,18 @@ install_docker(){
     sudo yum install repotrack_docker/*.rpm
 }
 
+set_docker_log_rotate(){
+    echo "set docker log driver and rotate..."
+    mkdir -p /etc/docker
+    echo '{
+    "log-driver": "local",
+    "log-opts": {
+        "max-size": "100m",
+        "max-file": "3"
+    }
+  }' > /etc/docker/daemon.json
+}
+
 # nvidia-docker need add repo
 # sudo yum install --downloadonly -y nvidia-docker2-2.6.0 --downloaddir=nvidia-docker2
 
@@ -85,6 +97,9 @@ remove_docker)
     ;;
 install_docker)
     install_docker
+    ;;
+set_docker_log_rotate)
+    set_docker_log_rotate
     ;;
 install_nvidia_docker)
     install_nvidia_docker

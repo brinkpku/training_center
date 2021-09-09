@@ -31,6 +31,18 @@ install_docker(){
     sudo yum install docker-ce-19.03.13 docker-ce-cli-19.03.13 containerd.io-1.3.7 # install specific version
 }
 
+set_docker_log_rotate(){
+    echo "set docker log driver and rotate..."
+    mkdir -p /etc/docker
+    echo '{
+    "log-driver": "local",
+    "log-opts": {
+        "max-size": "100m",
+        "max-file": "3"
+    }
+  }' > /etc/docker/daemon.json
+}
+
 install_nvidia_docker(){
     echo "install nvidia docker..."
     distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
@@ -77,6 +89,9 @@ remove_docker)
     ;;
 install_docker)
     install_docker
+    ;;
+set_docker_log_rotate)
+    set_docker_log_rotate
     ;;
 install_nvidia_docker)
     install_nvidia_docker
