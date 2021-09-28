@@ -1,0 +1,21 @@
+@startuml task
+actor user
+participant "argus-task-manager" as atm
+participant tms
+participant "vps-manager" as vm
+autonumber 0
+note over worker
+ only one worker of
+ each type applet 
+end note
+user -> atm : [post] create task
+atm --> worker : create if not exist
+atm -> tms : new task
+tms -> vm : taskNew
+vm -> worker : assgin to worker
+note left 
+get applet info 
+and task info from zk
+end note
+atm -> tms : taskStatus
+@enduml
