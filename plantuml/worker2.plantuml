@@ -1,0 +1,32 @@
+@startuml new worker dispatcher
+actor user as u
+participant "argus task manager" as atm
+participant "viperlite tms" as tms
+participant "vps manager" as vm
+participant "applet workers" as w
+skinparam responseMessageBelowArrow true
+skinparam handwritten true
+autonumber 0
+u -> atm : create task request
+atm -> u : response param and power check
+...
+/ note over atm: scheduler
+atm --> w: if not exist corresponding worker, select a gpu by strategy, \nthen start a worker.\n<font color=DeepSkyBlue>if exist worker, but gpu utils > 90%, try to start a new worker.
+note left
+gpu select strategy:
+**<font color=DeepSkyBlue>`gpu_exhausted`**
+**`max_free_memory`**
+**`random`**
+end note
+atm -> tms: create task request with worker select strategy
+note left #DeepSkyBlue
+worker select strategy:
+**`max_free_memory`**
+**`min_task_num`**
+end note
+tms -> vm : create task request
+vm -> w: task assign <s:red> & balance </strike>by quota
+tms -> atm : task status
+w -> u: applet output to users by mqtt
+atm -> w: clean unused worker job
+@enduml

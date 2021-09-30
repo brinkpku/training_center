@@ -1,0 +1,26 @@
+@startuml simple worker dispatcher
+actor user as u
+participant "argus task manager" as atm
+participant "viperlite tms" as tms
+participant "vps manager" as vm
+participant "applet workers" as w
+skinparam responseMessageBelowArrow true
+skinparam handwritten true
+autonumber 0
+u -> atm : create task request
+atm -> u : response param and power check
+...
+/ note over atm: scheduler
+atm --> w: if not exist correspond of worker, select a gpu by strategy, \nthen start a worker
+note left
+gpu select strategy:
+**`max_free_memory`**
+**`random`**
+end note
+atm -> tms: create task request
+tms -> vm : create task request
+vm -> w: task assign & balance by quota
+tms -> atm : task status
+w -> u: applet output to users by mqtt
+atm -> w: clean unused worker
+@enduml
