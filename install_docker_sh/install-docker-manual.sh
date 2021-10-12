@@ -80,6 +80,7 @@ install_docker_compose(){
 main(){
     # remove_docker
     install_docker
+    set_docker_log_rotate
     install_nvidia_docker
     start_docker
     set_auto_start_docker
