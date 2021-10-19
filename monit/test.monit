@@ -1,0 +1,5 @@
+check process echo with matching "./monit/echo.sh"
+    start program = "sh ./monit/echo.sh"
+    stop program = "ps -ef | grep echo | grep -v grep | awk '{print $3}' | xargs kill -9"
+    # depends on
+    group test 
