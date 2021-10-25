@@ -1,5 +1,6 @@
-check process echo with matching "./monit/echo.sh"
-    start program = "sh ./monit/echo.sh"
-    stop program = "ps -ef | grep echo | grep -v grep | awk '{print $3}' | xargs kill -9"
+check process echo with pidfile .test.pid
+    start program = "/bin/sh /monit/echo.sh &" with timeout 5 seconds # absolute command
+    #stop program = "/bin/ps -ef | grep monit/echo | grep -v grep | awk '{print $3}' | xargs kill -9"
+    stop program = "kill -9 $(cat .test.pid)"
     # depends on
     group test 
