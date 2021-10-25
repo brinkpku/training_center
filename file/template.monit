@@ -1,0 +1,6 @@
+check process {{ .Name }} with pidfile .test.pid
+    start program = "/bin/sh /monit/echo.sh &" with timeout 5 seconds # absolute command
+    #stop program = "/bin/ps -ef | grep monit/echo | grep -v grep | awk '{print $3}' | xargs kill -9"
+    stop program = "kill -9 $(cat .test.pid)"
+    # depends on
+    group test 
