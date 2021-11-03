@@ -34,7 +34,8 @@ remove_docker(){
 # repotrack  docker-ce-19.03.13 docker-ce-cli-19.03.13 containerd.io-1.3.7
 install_docker(){
     echo "install docker ce cli containerd.io..."
-    sudo yum install repotrack_docker/*.rpm
+    # sudo yum install repotrack_docker/*.rpm
+    sudo rpm -Uvh --force --nodeps repotrack_docker/*.rpm
 }
 
 set_docker_log_rotate(){

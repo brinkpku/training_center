@@ -3,11 +3,10 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"text/template"
 	"time"
-
-	"github.com/micro/go-micro/util/log"
 )
 
 type Monit struct {
@@ -19,7 +18,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("read file error: %v", err)
 	}
-	log.Info(tmplStr)
+	log.Println(tmplStr)
 	m := Monit{Name: "test"}
 	tmpl, err := template.New("monit").Parse(tmplStr)
 	if err != nil {
