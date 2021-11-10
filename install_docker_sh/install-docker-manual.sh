@@ -56,7 +56,8 @@ set_docker_log_rotate(){
 install_nvidia_docker(){
     echo "install nvidia docker..."
     nvidia_path="nvidia-docker2-2.6.0"
-    sudo yum install $nvidia_path/*rpm
+    # sudo yum install $nvidia_path/*rpm
+    sudo rpm -Uvh --force --nodeps $nvidia_path/*.rpm
 }
 
 start_docker(){

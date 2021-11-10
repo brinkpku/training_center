@@ -24,10 +24,19 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	files, err := ioutil.ReadDir("./")
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, fi := range files {
+		log.Println("file name:", fi.Name(), fi.IsDir())
+	}
+	if err = os.Symlink("../encode", "slink"); err != nil {
+		log.Fatal(err)
+	}
 	f, err := os.OpenFile("/etc/monit.d/test.monit", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777) //linux 路径
 	if err != nil {
-		fmt.Printf("open err%s", err)
-		return
+		log.Fatal(err)
 	}
 	if err := tmpl.Execute(f, m); err != nil {
 		log.Fatal(err)
