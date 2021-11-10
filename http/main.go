@@ -35,7 +35,7 @@ func HTTPGet(req interface{}) (resp interface{}, err error) {
 		var res *http.Response
 		// r.Header.Add("Content-Type", "application/json")
 		r.Header.Add("accept", "application/json")
-		r.Header.Add("Authorization", "Basic YWRtaW4xMjM0OmFkbWluMTIzNA==")
+		r.Header.Add("Authorization", "Basic xxx")
 		if res, err = client.Do(r); err != nil {
 			return
 		}
