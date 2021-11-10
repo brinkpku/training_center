@@ -36,6 +36,7 @@ func main() {
 			fmt.Println("get status error:", err)
 			return
 		}
+		println(device.Model)
 		// fmt.Printf("device %v status: %v\n", deviceID, status)
 		fmt.Println("memory free", *status.Memory.Global.Free, "used", *status.Memory.Global.Used)
 		fmt.Println("utilization", *status.Utilization.Memory)
