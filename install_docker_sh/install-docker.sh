@@ -31,6 +31,13 @@ install_docker(){
     sudo yum install docker-ce-19.03.13 docker-ce-cli-19.03.13 containerd.io-1.3.7 # install specific version
 }
 
+install_nvidia_docker(){
+    echo "install nvidia docker..."
+    distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
+    && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.repo | sudo tee /etc/yum.repos.d/nvidia-docker.repo
+    sudo yum install -y nvidia-docker2-2.6.0
+}
+
 set_docker_log_rotate(){
     echo "set docker log driver and rotate..."
     mkdir -p /etc/docker
@@ -39,15 +46,14 @@ set_docker_log_rotate(){
     "log-opts": {
         "max-size": "100m",
         "max-file": "3"
+    },
+    "runtimes": {
+        "nvidia": {
+            "path": "nvidia-container-runtime",
+            "runtimeArgs": []
+        }
     }
   }' > /etc/docker/daemon.json
-}
-
-install_nvidia_docker(){
-    echo "install nvidia docker..."
-    distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
-    && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.repo | sudo tee /etc/yum.repos.d/nvidia-docker.repo
-    sudo yum install -y nvidia-docker2-2.6.0
 }
 
 start_docker(){
@@ -72,8 +78,8 @@ install_docker_compose(){
 main(){
     # remove_docker
     install_docker
-    set_docker_log_rotate
     install_nvidia_docker
+    set_docker_log_rotate
     start_docker
     set_auto_start_docker
     install_docker_compose
