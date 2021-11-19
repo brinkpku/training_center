@@ -1,0 +1,33 @@
+@startuml task status machine
+hide empty description
+
+TaskPending : 任务待运行 = 1
+TaskScheduleFailed : 任务调度失败 = 2
+TaskRuning  : 任务正在运行 = 3
+TaskFinish : 任务结束,如文件类型任务读取完成或视频预设周期已执行完毕 = 4
+TaskInternalErr : 任务内部错误,运行中中途崩溃且无法恢复 = 5
+TaskStopFailed : 任务停止失败,不会对外暴露 = 6
+TaskSubmitted : 任务已提交 = 7
+TaskStatusParmaError : 任务参数错误  = 8
+state taskJob #DeepSkyBlue
+note right of taskJob : taskJob每分钟check task的布控时间、状态\n来决定启动、停止任务
+
+[*] --> TaskPending : 新建或编辑任务成功后，任务置为pending，待运行
+[*] --> TaskStatusParmaError : 新建或编辑任务参数错误
+TaskStatusParmaError --> [*]
+TaskPending --> taskJob
+taskJob --> TaskScheduleFailed : applet不存在；worker不满足要求；一些网络错误
+taskJob --> TaskSubmitted : 有可用的worker，调用tms创建任务成功
+TaskScheduleFailed --> TaskSubmitted : 经过处理恢复，导入了applet；有可用worker；网络正常；
+TaskSubmitted --> TaskRuning : statusJob每分钟查询tms状态，tms返回任务ok
+TaskSubmitted --> TaskInternalErr : statusJob每分钟查询tms状态，tms返回任务错误
+TaskRuning --> TaskInternalErr : statusJob每分钟查询tms状态，tms返回任务错误
+TaskRuning --> TaskFinish : 任务布控时间结束，删除tms中任务成功，结束 
+TaskRuning --> TaskStopFailed : 任务布控时间结束，删除tms中任务失败
+TaskRuning --> [*] : 若任务为永久生效，statusJob每分钟查询tms状态，tms返回任务ok
+TaskStopFailed --> TaskFinish : 重试直到任务删除成功，结束
+TaskInternalErr --> TaskRuning : statusJob每分钟查询tms状态，tms返回任务ok
+TaskInternalErr --> [*] : 若任务为永久生效，且worker内部错误不是稳定性造成的
+TaskFinish --> [*]
+
+@enduml
