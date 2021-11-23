@@ -26,8 +26,19 @@ func main() {
 		return
 	}
 	driver, err := sqlite3.WithInstance(sqliteDB, &sqlite3.Config{})
-	m, err := migrate.NewWithDatabaseInstance(
-		"file:///migrations",
-		"sqlite3", driver)
-	m.Steps(2)
+	if err != nil {
+		log.Fatalf("get migrate driver with instance error: %v", err)
+	}
+	m, err := migrate.NewWithDatabaseInstance("file://./migrations", "sqlite3", driver)
+	if err != nil {
+		log.Fatalf("new instance error: %v", err)
+	}
+	if err = m.Up(); err != nil {
+		log.Fatalf("up error: %v", err)
+	}
+	curV, dirty, err := driver.Version()
+	if err != nil {
+		log.Fatalf("get version error: %v", err)
+	}
+	log.Printf("current version is %d, dirty is %v", curV, dirty)
 }
