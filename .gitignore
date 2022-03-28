@@ -1,2 +1,6 @@
 *.key
 *.pem
+
+data.db
+
+*.log
