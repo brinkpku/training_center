@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"text/template"
 	"time"
 )
@@ -31,13 +32,20 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	sort.Slice(files, func(a, b int) bool {
+		return files[a].ModTime().Before(files[b].ModTime())
+	})
+	sort.Slice(files, func(a, b int) bool {
+		return files[a].Size() > files[b].Size()
+	})
 	for _, fi := range files {
-		log.Println("file name:", fi.Name(), fi.IsDir())
+		log.Println("file name:", fi.Name(), fi.IsDir(), fi.Size(), fi.ModTime().Format("2006-01-02 15:04:05"))
 	}
 	if err = os.Symlink("../encode", "slink"); err != nil {
 		log.Fatal(err)
 	}
-	f, err := os.OpenFile("/etc/monit.d/test.monit", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777) //linux 路径
+	f, err := os.OpenFile("./test.monit", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777) //linux 路径
 	if err != nil {
 		log.Fatal(err)
 	}
