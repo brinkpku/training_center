@@ -1,6 +1,6 @@
 module github.com/brinkpku/training_center/go-mp3
 
-go 1.13
+go 1.15
 
 require (
 	github.com/hajimehoshi/go-mp3 v0.3.3
