@@ -12,18 +12,26 @@ import (
 var wg sync.WaitGroup
 
 var (
-	config  *sarama.Config
-	host    string
-	port    int
-	topic   string
-	produce bool
-	help    bool
+	config         *sarama.Config
+	host           string
+	port           int
+	topic          string
+	produce        bool
+	help           bool
+	offset         int64
+	sasl           bool
+	user, password string
 )
 
 func init() {
 	flag.StringVar(&host, "host", "localhost", "kafka server host")
 	flag.IntVar(&port, "port", 9092, "kafka server port")
-	flag.StringVar(&topic, "topic", "test.topic", "topic to produce and consume")
+	flag.Int64Var(&offset, "offset", -1, "-1(newest), -2(oldest)")
+	flag.BoolVar(&produce, "produce", false, "produce a test meesage to topic")
+	flag.BoolVar(&sasl, "sasl", false, "enable sasl auth")
+	flag.StringVar(&user, "u", "admin", "username")
+	flag.StringVar(&password, "p", "L5cbhqhl", "password")
+	flag.StringVar(&topic, "t", "test.topic", "topic to produce and consume")
 	flag.BoolVar(&help, "h", false, "show help info")
 	flag.Parse()
 }
@@ -34,6 +42,7 @@ func main() {
 		return
 	}
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.Println(host, topic, port, produce)
 	config = sarama.NewConfig()
 	//ack应答机制
 	config.Producer.RequiredAcks = sarama.WaitForAll
@@ -41,6 +50,12 @@ func main() {
 	config.Producer.Partitioner = sarama.NewRandomPartitioner
 	//回复确认
 	config.Producer.Return.Successes = true
+	if sasl { // login
+		config.Net.SASL.Enable = true
+		config.Net.SASL.User = user
+		config.Net.SASL.Password = password
+	}
+
 	addr := fmt.Sprintf("%s:%d", host, port)
 
 	if produce {
@@ -69,7 +84,7 @@ func push(addr, topic string) {
 }
 
 func consume(addr, topic string) {
-	consumer, err := sarama.NewConsumer([]string{addr}, nil)
+	consumer, err := sarama.NewConsumer([]string{addr}, config)
 	if err != nil {
 		log.Println("fail to start consumer", err)
 	}
@@ -81,7 +96,8 @@ func consume(addr, topic string) {
 	log.Println(partitionList)
 	for p := range partitionList {
 		// create consumer for each partiton
-		pc, err := consumer.ConsumePartition(topic, int32(p), sarama.OffsetNewest)
+		p := p
+		pc, err := consumer.ConsumePartition(topic, int32(p), offset)
 		if err != nil {
 			fmt.Printf("failed to start consumer for partition %d, err:%v\n", p, err)
 		}
@@ -91,7 +107,7 @@ func consume(addr, topic string) {
 		go func(sarama.PartitionConsumer) {
 			for msg := range pc.Messages() {
 				log.Printf("partition:%d Offset:%d Key:%v Value:%s\n",
-					msg.Partition, msg.Offset, msg.Key, msg.Value)
+					msg.Partition, msg.Offset, string(msg.Key), string(msg.Value))
 			}
 			wg.Done()
 		}(pc)
