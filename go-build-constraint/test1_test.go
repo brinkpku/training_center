@@ -1,4 +1,5 @@
-//+build test_all t1
+//go:build test_all || t1
+// +build test_all t1
 
 package go_build_constraint
 
