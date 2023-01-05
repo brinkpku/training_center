@@ -106,7 +106,7 @@ func consume(addr, topic string) {
 		// consume
 		go func(sarama.PartitionConsumer) {
 			for msg := range pc.Messages() {
-				log.Printf("partition:%d Offset:%d Key:%v Value:%s\n",
+				log.Printf("partition:%d Offset:%d Key:%v\n%s\n",
 					msg.Partition, msg.Offset, string(msg.Key), string(msg.Value))
 			}
 			wg.Done()
