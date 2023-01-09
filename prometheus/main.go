@@ -23,16 +23,19 @@ func recordMetrics() {
 
 var (
 	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "myapp_processed_ops_total",
-		Help: "The total number of processed events",
+		Namespace: "global",
+		Name:      "myapp_processed_ops_total",
+		Help:      "The total number of processed events",
 	})
 	processDur = promauto.NewHistogram(prometheus.HistogramOpts{
 		Name: "myapp_processed_duration",
 		Help: "The latency of process",
 	})
 	actionCounter = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "myapp_action",
-		Help: "The action num",
+		Namespace: "global",
+		Subsystem: "detail",
+		Name:      "myapp_action",
+		Help:      "The action num",
 	}, []string{"type"})
 )
 
